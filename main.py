@@ -9,8 +9,7 @@ from settings import OUTPUT_FILE
 from settings import OUTPUT_SHEET
 
 
-def is_last_row(row):
-    site_id = row[0].value
+def is_last_row(site_id):
     if site_id and isinstance(site_id, str):
         site_tokens = site_id.split()
         try:
@@ -47,10 +46,7 @@ def format_row_item(row_item, row_id, skip_key="Site ID"):
     return formatted_row
 
 
-def write_data_to_excel_file(data, header):
-    wb = Workbook()
-    sheet = wb.active
-    sheet.title = OUTPUT_SHEET
+def write_data_to_excel_sheet(data, header, sheet):
     row_num = 1
     for i, heading in enumerate(header):
         sheet.cell(row=row_num, column=i+1, value=heading)
@@ -67,7 +63,7 @@ def write_data_to_excel_file(data, header):
                 col = header.index(heading)+1
                 sheet.cell(row=row_num, column=col, value=value)
             row_num += 1
-    return wb
+    return sheet
 
 
 def get_header_from_first_row(row):
@@ -86,13 +82,17 @@ def read_data_from_sheet(sheet):
         temp = []
         if row_num == 0:
             continue
-        row_id = is_last_row(row)
+
         for col_i, cell in enumerate(row):
             if cell.value is not None:
                 temp.append(cell.value)
         row_item.append(temp)
+
+        row_id = is_last_row(row[0].value)
+        counter = 0
         if row_id:
             formatted_row = format_row_item(row_item, row_id)
+            counter += 1
             if formatted_row:
                 data[row_id] = formatted_row
             if not header:
@@ -105,7 +105,10 @@ def run():
     wb = load_workbook(INPUT_FILE)
     sheet = wb[INPUT_SHEET]
     data, header = read_data_from_sheet(sheet)
-    wb = write_data_to_excel_file(data, header)
+    wb = Workbook()
+    sheet = wb.active
+    sheet.title = OUTPUT_SHEET
+    write_data_to_excel_sheet(data, header, sheet)
     wb.save(OUTPUT_FILE)
 
 
