@@ -67,7 +67,7 @@ def write_data_to_excel_file(data, header):
                 col = header.index(heading)+1
                 sheet.cell(row=row_num, column=col, value=value)
             row_num += 1
-    wb.save(OUTPUT_FILE)
+    return wb
 
 
 def get_header_from_first_row(row):
@@ -105,7 +105,8 @@ def run():
     wb = load_workbook(INPUT_FILE)
     sheet = wb[INPUT_SHEET]
     data, header = read_data_from_sheet(sheet)
-    write_data_to_excel_file(data, header)
+    wb = write_data_to_excel_file(data, header)
+    wb.save(OUTPUT_FILE)
 
 
 if __name__ == '__main__':
